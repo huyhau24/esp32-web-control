@@ -1,32 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <title>ESP32 Firebase Control</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điều khiển Relay qua Firebase</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #74ebd5, #acb6e5);
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .relay-box {
+      margin: 15px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .relay-label {
+      font-size: 18px;
+      color: #555;
+    }
+    .status-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #333;
+    }
+    .button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .on { background: #28a745; color: white; }
+    .off { background: #dc3545; color: white; }
+    .on:hover { background: #218838; }
+    .off:hover { background: #c82333; }
+  </style>
 </head>
 <body>
-  <h2>Điều khiển ESP32 qua Firebase</h2>
-  <button onclick="setLED(true)">BẬT LED</button>
-  <button onclick="setLED(false)">TẮT LED</button>
+  <div class="container">
+    <h1>Điều khiển Relay</h1>
+    <div class="relay-box">
+      <span class="relay-label">Relay 1</span>
+      <div id="status1" class="status-box"></div>
+      <button id="btn1" class="button off" onclick="toggleRelay(1)">TẮT</button>
+    </div>
+    <div class="relay-box">
+      <span class="relay-label">Relay 2</span>
+      <div id="status2" class="status-box"></div>
+      <button id="btn2" class="button off" onclick="toggleRelay(2)">TẮT</button>
+    </div>
+    <div class="relay-box">
+      <span class="relay-label">Relay 3</span>
+      <div id="status3" class="status-box"></div>
+      <button id="btn3" class="button off" onclick="toggleRelay(3)">TẮT</button>
+    </div>
+  </div>
 
   <script>
-    // Cấu hình Firebase Web (vào Project Settings > General > Web App)
+    // Cấu hình Firebase (lấy từ Firebase Console > Project Settings > Web App)
     var firebaseConfig = {
-      apiKey: "AIza....",
-      authDomain: "esp32-xxx.firebaseapp.com",
+      apiKey: "YOUR_API_KEY",
+      authDomain: "esp32-3d14f.firebaseapp.com",
       databaseURL: "https://esp32-3d14f-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "esp32-3d14f",
       storageBucket: "esp32-3d14f.appspot.com",
-      messagingSenderId: "xxxxxxxxxx",
-      appId: "1:xxxxxxxxxx:web:yyyyyyyy"
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     var db = firebase.database();
 
-    function setLED(status) {
-      db.ref("/ledStatus").set(status);
+    // Cập nhật giao diện khi trạng thái thay đổi
+    function updateStatus(relayNum, state) {
+      const statusBox = document.getElementById(`status${relayNum}`);
+      const button = document.getElementById(`btn${relayNum}`);
+      statusBox.style.backgroundColor = state ? '#28a745' : '#dc3545';
+      button.textContent = state ? 'BẬT' : 'TẮT';
+      button.className = `button ${state ? 'on' : 'off'}`;
     }
+
+    // Chuyển đổi trạng thái relay
+    function toggleRelay(relayNum) {
+      const ref = db.ref(`/relay${relayNum}`);
+      ref.once('value').then(snapshot => {
+        const currentState = snapshot.val();
+        ref.set(!currentState);
+      });
+    }
+
+    // Lắng nghe thay đổi từ Firebase
+    db.ref('/relay1').on('value', snapshot => updateStatus(1, snapshot.val()));
+    db.ref('/relay2').on('value', snapshot => updateStatus(2, snapshot.val()));
+    db.ref('/relay3').on('value', snapshot => updateStatus(3, snapshot.val()));
   </script>
 </body>
 </html>

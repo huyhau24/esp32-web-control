@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Điều khiển Relay qua Firebase</title>
+  <title>Điều khiển Relay và Đo Khoảng Cách</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
@@ -61,11 +61,21 @@
     .off { background: #dc3545; color: white; }
     .on:hover { background: #218838; }
     .off:hover { background: #c82333; }
+    .terminal {
+      margin: 20px 0;
+      padding: 15px;
+      background: #222;
+      color: #0f0;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Điều khiển Relay</h1>
+    <h1>Điều khiển Relay & Khoảng Cách</h1>
+    <div class="terminal" id="distance">Khoảng cách: 0 cm</div>
     <div class="relay-box">
       <span class="relay-label">Relay 1</span>
       <div id="status1" class="status-box"></div>
@@ -97,7 +107,7 @@
     firebase.initializeApp(firebaseConfig);
     var db = firebase.database();
 
-    // Cập nhật giao diện khi trạng thái thay đổi
+    // Cập nhật giao diện relay
     function updateStatus(relayNum, state) {
       const statusBox = document.getElementById(`status${relayNum}`);
       const button = document.getElementById(`btn${relayNum}`);
@@ -119,6 +129,10 @@
     db.ref('/relay1').on('value', snapshot => updateStatus(1, snapshot.val()));
     db.ref('/relay2').on('value', snapshot => updateStatus(2, snapshot.val()));
     db.ref('/relay3').on('value', snapshot => updateStatus(3, snapshot.val()));
+    db.ref('/distance').on('value', snapshot => {
+      const distance = snapshot.val();
+      document.getElementById('distance').textContent = `Khoảng cách: ${distance.toFixed(1)} cm`;
+    });
   </script>
 </body>
 </html>

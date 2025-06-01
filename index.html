@@ -129,7 +129,7 @@
     db.ref('/relay1').on('value', snapshot => updateStatus(1, snapshot.val()));
     db.ref('/relay2').on('value', snapshot => updateStatus(2, snapshot.val()));
     db.ref('/relay3').on('value', snapshot => updateStatus(3, snapshot.val()));
-    db.ref('/distance').on('value', snapshot => {
+    db.ref('/distance_from_uno').on('value', snapshot => {
       const distance = snapshot.val();
       document.getElementById('distance').textContent = `Khoảng cách: ${distance.toFixed(1)} cm`;
     });
